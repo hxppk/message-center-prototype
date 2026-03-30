@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消息中心 - 手动消息</title>
+    <link rel="stylesheet" href="https://unpkg.com/@arco-design/web-react/dist/css/arco.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@arco-design/web-react/dist/css/iconfont.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #165DFF;
+            --primary-color-light: #E8F3FF;
+            --success-color: #00B42A;
+            --warning-color: #FF7D00;
+            --error-color: #F53F3F;
+            --text-primary: #1D2129;
+            --text-secondary: #4E5969;
+            --text-tertiary: #86909C;
+            --border-color: #E5E6EB;
+            --bg-primary: #F2F3F5;
+            --bg-white: #FFFFFF;
+            --sidebar-bg: #FFFFFF;
+            --sidebar-active: #E8F3FF;
+            --sidebar-hover: #F7F8FA;
+            --canvas-type-bg: #FFF2E8;
+            --canvas-type-color: #FF7D00;
+            --normal-type-bg: #E8FFEA;
+            --normal-type-color: #00B42A;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* 整体布局 */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 220px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            height: 60px;
+            padding: 0 24px;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #165DFF 0%, #0E42D2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .menu-container {
+            flex: 1;
+            padding: 12px 0;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+        }
+
+        .menu-item:hover {
+            background: var(--sidebar-hover);
+        }
+
+        .menu-item.active {
+            background: var(--sidebar-active);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .menu-item i {
+            font-size: 18px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .menu-section-title {
+            padding: 16px 24px 8px;
+            font-size: 12px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            margin-left: 220px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部导航 */
+        .header {
+            height: 60px;
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 99;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-item {
+            cursor: pointer;
+        }
+
+        .breadcrumb-item:hover {
+            color: var(--primary-color);
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-tertiary);
+        }
+
+        .breadcrumb-current {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .user-info:hover {
+            background: var(--bg-primary);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #165DFF 0%, #0E42D2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+        }
+
+        /* 页面内容 */
+        .page-content {
+            padding: 20px 24px;
+            flex: 1;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            outline: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0E42D2;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-primary);
+        }
+
+        /* 筛选区域 */
+        .filter-section {
+            background: var(--bg-white);
+            padding: 20px 24px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .input, .select {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+            min-width: 180px;
+        }
+
+        .input:focus, .select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(22, 93, 255, 0.1);
+        }
+
+        /* 表格区域 */
+        .table-container {
+            background: var(--bg-white);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background: var(--bg-primary);
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .table tr:hover td {
+            background: #F7F8FA;
+        }
+
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* 标签样式 */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tag-canvas {
+            background: var(--canvas-type-bg);
+            color: var(--canvas-type-color);
+        }
+
+        .tag-normal {
+            background: var(--normal-type-bg);
+            color: var(--normal-type-color);
+        }
+
+        /* 操作按钮 */
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--primary-color-light);
+        }
+
+        .action-btn.disabled {
+            color: var(--text-tertiary);
+            cursor: not-allowed;
+        }
+
+        .action-btn.disabled:hover {
+            background: transparent;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 16px 24px;
+            gap: 8px;
+        }
+
+        .page-btn {
+            min-width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            background: white;
+            color: var(--text-secondary);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(.disabled):not(.active) {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .page-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .page-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .page-size {
+            margin-left: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+
+        /* 详情页样式 */
+        .detail-container {
+            background: var(--bg-white);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .detail-section {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .info-value.text-secondary {
+            color: var(--text-secondary);
+            font-weight: normal;
+        }
+
+        /* Tab 样式 */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--primary-color);
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-color);
+        }
+
+        /* 统计筛选 */
+        .stats-filter {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stats-filter-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .date-input {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            width: 140px;
+        }
+
+        /* 隐藏类 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* 返回按钮 */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: color 0.2s;
+        }
+
+        .back-btn:hover {
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">智</div>
+                <span>智能运营平台</span>
+            </div>
+            <div class="menu-container">
+                <div class="menu-item">
+                    <i class="iconfont icon-home"></i>
+                    <span>首页</span>
+                </div>
+                <div class="menu-section-title">消息中心</div>
+                <div class="menu-item active">
+                    <i class="iconfont icon-message"></i>
+                    <span>手动消息</span>
+                </div>
+                <div class="menu-item">
+                    <i class="iconfont icon-robot"></i>
+                    <span>自动消息</span>
+                </div>
+                <div class="menu-item">
+                    <i class="iconfont icon-template"></i>
+                    <span>模板管理</span>
+                </div>
+                <div class="menu-item">
+                    <i class="iconfont icon-chart"></i>
+                    <span>消息统计</span>
+                </div>
+                <div class="menu-section-title">营销画布</div>
+                <div class="menu-item">
+                    <i class="iconfont icon-canvas"></i>
+                    <span>画布列表</span>
+                </div>
+                <div class="menu-item">
+                    <i class="iconfont icon-strategy"></i>
+                    <span>策略配置</span>
+                </div>
+                <div class="menu-section-title">系统管理</div>
+                <div class="menu-item">
+                    <i class="iconfont icon-user"></i>
+                    <span>用户管理</span>
+                </div>
+                <div class="menu-item">
+                    <i class="iconfont icon-setting"></i>
+                    <span>系统设置</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部导航 -->
+            <header class="header">
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">首页</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-item">消息中心</span>
+                    <span class="breadcrumb-separator">/</span>
+                    <span class="breadcrumb-current">手动消息</span>
+                </div>
+                <div class="header-actions">
+                    <div class="user-info">
+                        <div class="user-avatar">A</div>
+                        <span>Admin</span>
+                        <i class="iconfont icon-down"></i>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div class="page-content">
+                <!-- 列表页 -->
+                <div id="list-page">
+                    <div class="page-header">
+                        <h1 class="page-title">手动消息列表</h1>
+                        <div class="page-actions">
+                            <button class="btn btn-primary">
+                                <i class="iconfont icon-plus"></i>
+                                新增手动消息
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 筛选区域 -->
+                    <div class="filter-section">
+                        <div class="filter-row">
+                            <div class="filter-item">
+                                <span class="filter-label">消息标题：</span>
+                                <input type="text" class="input" placeholder="请输入消息标题">
+                            </div>
+                            <div class="filter-item">
+                                <span class="filter-label">消息类型：</span>
+                                <select class="select">
+                                    <option value="">全部</option>
+                                    <option value="normal">普通消息</option>
+                                    <option value="canvas">定时型营销画布</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <span class="filter-label">发送方式：</span>
+                                <select class="select">
+                                    <option value="">全部</option>
+                                    <option value="app">APP推送</option>
+                                    <option value="sms">短信</option>
+                                    <option value="wechat">微信</option>
+                                    <option value="icc">企微客户群发</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <button class="btn btn-primary">
+                                    <i class="iconfont icon-search"></i>
+                                    查询
+                                </button>
+                                <button class="btn btn-secondary">重置</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 表格区域 -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <span class="table-title">消息列表</span>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">序号</th>
+                                    <th>消息类型</th>
+                                    <th>消息标题</th>
+                                    <th>发送时间</th>
+                                    <th>发送方式</th>
+                                    <th>创建人/创建时间</th>
+                                    <th>修改人/修改时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td><span class="tag tag-canvas">定时型营销画布</span></td>
+                                    <td>营销画布_企微客户群发(ICC)</td>
+                                    <td>2025-03-20 10:00:00</td>
+                                    <td>企微客户群发(ICC)</td>
+                                    <td>zhaoli<br>2025-03-15 14:30:00</td>
+                                    <td>zhaoli<br>2025-03-15 14:30:00</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <span class="action-btn" onclick="showDetail('canvas')">详情</span>
+                                            <span class="action-btn">统计</span>
+                                            <span class="action-btn disabled">编辑</span>
+                                            <span class="action-btn disabled">删除</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td><span class="tag tag-canvas">定时型营销画布</span></td>
+                                    <td>营销画布_企微客户群发(ICC)</td>
+                                    <td>2025-03-18 09:00:00</td>
+                                    <td>企微客户群发(ICC)</td>
+                                    <td>wangwu<br>2025-03-10 16:00:00</td>
+                                    <td>wangwu<br>2025-03-10 16:00:00</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <span class="action-btn" onclick="showDetail('canvas')">详情</span>
+                                            <span class="action-btn">统计</span>
+                                            <span class="action-btn disabled">编辑</span>
+                                            <span class="action-btn disabled">删除</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td><span class="tag tag-canvas">定时型营销画布</span></td>
+                                    <td>营销画布_企微客户群发(ICC)</td>
+                                    <td>2025-03-15 14:00:00</td>
+                                    <td>企微客户群发(ICC)</td>
+                                    <td>zhangsan<br>2025-03-08 10:30:00</td>
+                                    <td>zhangsan<br>2025-03-08 10:30:00</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <span class="action-btn" onclick="showDetail('canvas')">详情</span>
+                                            <span class="action-btn">统计</span>
+                                            <span class="action-btn">编辑</span>
+                                            <span class="action-btn">删除</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td><span class="tag tag-canvas">定时型营销画布</span></td>
+                                    <td>营销画布_企微客户群发(ICC)</td>
+                                    <td>定时发送</td>
+                                    <td>企微客户群发(ICC)</td>
+                                    <td>lisi<br>2025-03-05 09:00:00</td>
+                                    <td>lisi<br>2025-03-05 09:00:00</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <span class="action-btn" onclick="showDetail('canvas')">详情</span>
+                                            <span class="action-btn">统计</span>
+                                            <span class="action-btn disabled">编辑</span>
+                                            <span class="action-btn disabled">删除</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td><span class="tag tag-canvas">定时型营销画布</span></td>
+                                    <td>营销画布_企微客户群发(ICC)</td>
+                                    <td>定时发送</td>
+                                    <td>企微客户群发(ICC)</td>
+                                    <td>zhaoliu<br>2025-03-01 11:00:00</td>
+                                    <td>zhaoliu<br>2025-03-01 11:00:00</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <span class="action-btn" onclick="showDetail('canvas')">详情</span>
+                                            <span class="action-btn">统计</span>
+                                            <span class="action-btn disabled">编辑</span>
+                                            <span class="action-btn disabled">删除</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>6</td>
+                                    <td><span class="tag tag-canvas">定时型营销画布</span></td>
+                                    <td>营销画布_企微客户群发(ICC)</td>
+                                    <td>定时发送</td>
+                                    <td>企微客户群发(ICC)</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <span class="action-btn" onclick="showDetail('canvas')">详情</span>
+                                            <span class="action-btn">统计</span>
+                                            <span class="action-btn">编辑</span>
+                                            <span class="action-btn">删除</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>7</td>
+                                    <td><span class="tag tag-normal">普通消息</span></td>
+                                    <td>月末活动通知</td>
+                                    <td>2025-03-20 10:00:00</td>
+                                    <td>APP推送</td>
+                                    <td>admin<br>2025-03-18 15:30:00</td>
+                                    <td>admin<br>2025-03-18 15:30:00</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <span class="action-btn" onclick="showDetail('normal')">详情</span>
+                                            <span class="action-btn">统计</span>
+                                            <span class="action-btn">编辑</span>
+                                            <span class="action-btn">删除</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>8</td>
+                                    <td><span class="tag tag-normal">普通消息</span></td>
+                                    <td>新用户欢迎礼包</td>
+                                    <td>2025-03-19 09:00:00</td>
+                                    <td>短信</td>
+                                    <td>admin<br>2025-03-17 10:00:00</td>
+                                    <td>admin<br>2025-03-17 10:00:00</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <span class="action-btn" onclick="showDetail('normal')">详情</span>
+                                            <span class="action-btn">统计</span>
+                                            <span class="action-btn">编辑</span>
+                                            <span class="action-btn">删除</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>9</td>
+                                    <td><span class="tag tag-normal">普通消息</span></td>
+                                    <td>优惠券到期提醒</td>
+                                    <td>2025-03-18 14:00:00</td>
+                                    <td>微信</td>
+                                    <td>admin<br>2025-03-15 16:30:00</td>
+                                    <td>admin<br>2025-03-15 16:30:00</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <span class="action-btn" onclick="showDetail('normal')">详情</span>
+                                            <span class="action-btn">统计</span>
+                                            <span class="action-btn">编辑</span>
+                                            <span class="action-btn">删除</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>10</td>
+                                    <td><span class="tag tag-normal">普通消息</span></td>
+                                    <td>生日祝福推送</td>
+                                    <td>2025-03-17 08:00:00</td>
+                                    <td>APP推送+短信</td>
+                                    <td>admin<br>2025-03-14 11:00:00</td>
+                                    <td>admin<br>2025-03-14 11:00:00</td>
+                                    <td>
+                                        <div class="action-btns">
+                                            <span class="action-btn" onclick="showDetail('normal')">详情</span>
+                                            <span class="action-btn">统计</span>
+                                            <span class="action-btn">编辑</span>
+                                            <span class="action-btn">删除</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="pagination">
+                            <button class="page-btn disabled">&lt;</button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn">4</button>
+                            <button class="page-btn">5</button>
+                            <button class="page-btn">&gt;</button>
+                            <div class="page-size">
+                                <span>每页</span>
+                                <select class="select" style="min-width: 70px;">
+                                    <option>10</option>
+                                    <option>20</option>
+                                    <option>50</option>
+                                </select>
+                                <span>条</span>
+                            </div>
+                            <span style="color: var(--text-tertiary); margin-left: 16px;">共 86 条</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 详情页 -->
+                <div id="detail-page" class="hidden">
+                    <div class="back-btn" onclick="showList()">
+                        <i class="iconfont icon-left"></i>
+                        返回列表
+                    </div>
+                    <div class="page-header">
+                        <h1 class="page-title">手动消息详情</h1>
+                        <div class="page-actions">
+                            <button class="btn btn-secondary" onclick="showList()">关闭</button>
+                        </div>
+                    </div>
+
+                    <div class="detail-container">
+                        <!-- 基础信息 -->
+                        <div class="detail-section">
+                            <div class="section-title">基础信息</div>
+                            <div class="info-grid" id="basic-info">
+                                <div class="info-item">
+                                    <span class="info-label">消息类型：</span>
+                                    <span class="info-value"><span class="tag tag-canvas">定时型营销画布</span></span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">消息标题：</span>
+                                    <span class="info-value">营销画布_企微客户群发(ICC)</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">消息渠道：</span>
+                                    <span class="info-value">企微客户群发(ICC)</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">发送时间：</span>
+                                    <span class="info-value">2025-03-20 10:00:00</span>
+                                </div>
+                                <div class="info-item canvas-only">
+                                    <span class="info-label">关联画布ID：</span>
+                                    <span class="info-value">CANVAS_202503150001</span>
+                                </div>
+                                <div class="info-item canvas-only">
+                                    <span class="info-label">关联画布名称：</span>
+                                    <span class="info-value">3月企微客户群发活动</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">创建人：</span>
+                                    <span class="info-value">zhaoli</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">创建时间：</span>
+                                    <span class="info-value">2025-03-15 14:30:00</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">修改人：</span>
+                                    <span class="info-value">zhaoli</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">修改时间：</span>
+                                    <span class="info-value">2025-03-15 14:30:00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 消息发送规则 -->
+                        <div class="detail-section">
+                            <div class="section-title">消息发送规则</div>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">人群选择：</span>
+                                    <span class="info-value text-secondary canvas-only">--（可至画布中查看具体配置）</span>
+                                    <span class="info-value normal-only">VIP用户群体</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">发送时间：</span>
+                                    <span class="info-value text-secondary canvas-only">--（可至画布中查看具体配置）</span>
+                                    <span class="info-value normal-only">2025-03-20 10:00:00</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">防打扰时段：</span>
+                                    <span class="info-value">22:00 - 08:00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 消息内容设置 -->
+                        <div class="detail-section">
+                            <div class="section-title">消息内容设置</div>
+                            <div class="info-grid">
+                                <div class="info-item" style="flex-direction: column; align-items: flex-start;">
+                                    <span class="info-label" style="margin-bottom: 12px;">消息内容：</span>
+                                    <div style="background: #F7F8FA; padding: 16px; border-radius: 4px; width: 100%; max-width: 600px;">
+                                        <p>亲爱的用户，您好！</p>
+                                        <p style="margin-top: 12px;">我们为您准备了专属优惠活动，点击立即查看详情，享受专属福利！</p>
+                                        <p style="margin-top: 12px; color: var(--primary-color);">[查看详情]</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 统计页 -->
+                <div id="stats-page" class="hidden">
+                    <div class="back-btn" onclick="showList()">
+                        <i class="iconfont icon-left"></i>
+                        返回列表
+                    </div>
+                    <div class="page-header">
+                        <h1 class="page-title">消息统计</h1>
+                        <div class="page-actions">
+                            <button class="btn btn-secondary" onclick="showList()">关闭</button>
+                        </div>
+                    </div>
+
+                    <!-- 统计筛选 -->
+                    <div class="filter-section">
+                        <div class="stats-filter">
+                            <div class="stats-filter-item">
+                                <span class="filter-label">消息标题：</span>
+                                <input type="text" class="input" placeholder="请输入消息标题" style="width: 200px;">
+                            </div>
+                            <div class="stats-filter-item canvas-filter">
+                                <span class="filter-label">画布名称：</span>
+                                <input type="text" class="input" placeholder="请输入画布名称" style="width: 200px;">
+                            </div>
+                            <div class="stats-filter-item canvas-filter">
+                                <span class="filter-label">画布发送日期：</span>
+                                <div class="date-range">
+                                    <input type="date" class="date-input">
+                                    <span>至</span>
+                                    <input type="date" class="date-input">
+                                </div>
+                            </div>
+                            <div class="stats-filter-item">
+                                <span class="filter-label">发送时间：</span>
+                                <div class="date-range">
+                                    <input type="date" class="date-input">
+                                    <span>至</span>
+                                    <input type="date" class="date-input">
+                                </div>
+                            </div>
+                            <div class="stats-filter-item">
+                                <button class="btn btn-primary">
+                                    <i class="iconfont icon-search"></i>
+                                    查询
+                                </button>
+                                <button class="btn btn-secondary">重置</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 统计数据表格 -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <span class="table-title">发送统计</span>
+                            <button class="btn btn-secondary">
+                                <i class="iconfont icon-download"></i>
+                                导出数据
+                            </button>
+                        </div>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>消息标题</th>
+                                    <th class="canvas-filter">画布名称</th>
+                                    <th class="canvas-filter">画布发送日期</th>
+                                    <th>发送方式</th>
+                                    <th>目标人数</th>
+                                    <th>发送成功</th>
+                                    <th>发送失败</th>
+                                    <th>成功率</th>
+                                    <th>打开人数</th>
+                                    <th>打开率</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>营销画布_企微客户群发(ICC)</td>
+                                    <td class="canvas-filter">3月企微客户群发活动</td>
+                                    <td class="canvas-filter">2025-03-20</td>
+                                    <td>企微客户群发(ICC)</td>
+                                    <td>15,234</td>
+                                    <td>15,180</td>
+                                    <td>54</td>
+                                    <td>99.6%</td>
+                                    <td>8,456</td>
+                                    <td>55.7%</td>
+                                </tr>
+                                <tr>
+                                    <td>营销画布_企微客户群发(ICC)</td>
+                                    <td class="canvas-filter">3月企微客户群发活动</td>
+                                    <td class="canvas-filter">2025-03-18</td>
+                                    <td>企微客户群发(ICC)</td>
+                                    <td>12,890</td>
+                                    <td>12,856</td>
+                                    <td>34</td>
+                                    <td>99.7%</td>
+                                    <td>7,234</td>
+                                    <td>56.2%</td>
+                                </tr>
+                                <tr>
+                                    <td>营销画布_企微客户群发(ICC)</td>
+                                    <td class="canvas-filter">会员日活动</td>
+                                    <td class="canvas-filter">2025-03-15</td>
+                                    <td>企微客户群发(ICC)</td>
+                                    <td>8,567</td>
+                                    <td>8,523</td>
+                                    <td>44</td>
+                                    <td>99.5%</td>
+                                    <td>4,890</td>
+                                    <td>57.4%</td>
+                                </tr>
+                                <tr>
+                                    <td>月末活动通知</td>
+                                    <td class="canvas-filter">-</td>
+                                    <td class="canvas-filter">-</td>
+                                    <td>APP推送</td>
+                                    <td>50,000</td>
+                                    <td>48,230</td>
+                                    <td>1,770</td>
+                                    <td>96.5%</td>
+                                    <td>12,456</td>
+                                    <td>25.8%</td>
+                                </tr>
+                                <tr>
+                                    <td>新用户欢迎礼包</td>
+                                    <td class="canvas-filter">-</td>
+                                    <td class="canvas-filter">-</td>
+                                    <td>短信</td>
+                                    <td>3,456</td>
+                                    <td>3,412</td>
+                                    <td>44</td>
+                                    <td>98.7%</td>
+                                    <td>1,234</td>
+                                    <td>36.2%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="pagination">
+                            <button class="page-btn disabled">&lt;</button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">3</button>
+                            <button class="page-btn">&gt;</button>
+                            <span style="color: var(--text-tertiary); margin-left: 16px;">共 23 条</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 页面切换功能
+        function showList() {
+            document.getElementById('list-page').classList.remove('hidden');
+            document.getElementById('detail-page').classList.remove('hidden');
+            document.getElementById('detail-page').classList.add('hidden');
+            document.getElementById('stats-page').classList.remove('hidden');
+            document.getElementById('stats-page').classList.add('hidden');
+        }
+
+        function showDetail(type) {
+            document.getElementById('list-page').classList.add('hidden');
+            document.getElementById('detail-page').classList.remove('hidden');
+
+            // 根据类型显示/隐藏画布特定字段
+            const canvasOnly = document.querySelectorAll('.canvas-only');
+            const normalOnly = document.querySelectorAll('.normal-only');
+
+            if (type === 'canvas') {
+                canvasOnly.forEach(el => el.style.display = 'flex');
+                normalOnly.forEach(el => el.style.display = 'none');
+            } else {
+                canvasOnly.forEach(el => el.style.display = 'none');
+                normalOnly.forEach(el => el.style.display = 'flex');
+                // 修改标签为普通消息
+                document.querySelector('#basic-info .tag').className = 'tag tag-normal';
+                document.querySelector('#basic-info .tag').textContent = '普通消息';
+            }
+        }
+
+        function showStats() {
+            document.getElementById('list-page').classList.add('hidden');
+            document.getElementById('stats-page').classList.remove('hidden');
+        }
+
+        // 给统计按钮添加点击事件
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            if (btn.textContent === '统计') {
+                btn.addEventListener('click', showStats);
+            }
+        });
+    </script>
+</body>
+</html>
